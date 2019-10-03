@@ -16,7 +16,7 @@
         <form action="login" method="post">
         <label>User Name:</label>
         <input type="text" name="user_name" value="" /><br>
-        <label>Password</label>
+        <label>Password:</label>
         <input type="password" name="user_password" value="" /><br>
         <input type="submit" value="Login" />
         ${message}

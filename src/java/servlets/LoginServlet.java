@@ -34,6 +34,27 @@ public class LoginServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
+         String logout = request.getParameter("logout");
+         //String user_name = request.getParameter("user_name");
+        //String user_password = request.getParameter("user_password");
+        
+          HttpSession session = request.getSession();
+          
+            if(logout != null)
+         {
+             String invalid = "Logged Out";
+             request.setAttribute("message",invalid);
+             session.invalidate();
+         }
+            
+          User user = (User)request.getSession().getAttribute("logged");
+          if(user != null)
+          {
+             response.sendRedirect("/home");
+             return;
+          }
+          
+     
          getServletContext().getRequestDispatcher("/WEB-INF/login.jsp").forward(request, response);
     }
 
@@ -51,7 +72,6 @@ public class LoginServlet extends HttpServlet {
          
          String user_name = request.getParameter("user_name");
          String user_password = request.getParameter("user_password");
-         String logout = request.getParameter("logout");
          
          if(user_name == null || user_name.equals("") 
                  || user_password == null || user_password.equals(""))
@@ -61,36 +81,32 @@ public class LoginServlet extends HttpServlet {
              getServletContext().getRequestDispatcher("/WEB-INF/login.jsp").forward(request, response);
              return;
          }
+        
          
          HttpSession session = request.getSession();
+         User user = (User)session.getAttribute("logged");
          
-          
-         if(logout != null)
-         {
-             //String invalid = "You've succssfully logged out.";
-             //request.setAttribute("message", invalid);
-             session.invalidate();
-             return;
-         }
-         
-         User user = new User();
-         AccountService as = new AccountService();
-         user = as.login(user_name, user_password);
          if(user != null)
-         {
-            user = (User)session.getAttribute("user");
-            response.sendRedirect("/home");
+        {
+             response.sendRedirect("/home");
+        }
+        else
+        {
+            AccountService as = new AccountService();
+            user = as.login(user_name, user_password);
+                if(user == null)
+                {
+                    String denied = "User/Password does not exist";
+                    request.setAttribute("message",denied);
+                    request.setAttribute("user_name", user_name);
+                    getServletContext().getRequestDispatcher("/WEB-INF/login.jsp").forward(request, response);
+                }
+                else
+                {
+                    session.setAttribute("logged", user);
+                    response.sendRedirect("/home");
+                }
          }
-         else
-         {
-             request.setAttribute("user_name", user_name);
-             request.setAttribute("user_password", user_password);
-             getServletContext().getRequestDispatcher("/WEB-INF/login.jsp").forward(request, response);
-             return;
-         }
-         
-        
-        
         
     }
 
